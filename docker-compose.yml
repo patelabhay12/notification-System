@@ -1,0 +1,87 @@
+services:
+  redis:
+    image: redis:7.2
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./volumes/redis:/data
+
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: redis-insight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    volumes:
+      - ./volumes/redis-insight:/db
+
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./volumes/mongo:/data/db
+
+  kafka1:
+    image: apache/kafka:3.7.0
+    container_name: kafka1
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9091,PLAINTEXT_HOST://0.0.0.0:29092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka1:9091,2@kafka2:9091,3@kafka3:9091
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - ./volumes/kafka1:/var/lib/kafka/data
+
+  kafka2:
+    image: apache/kafka:3.7.0
+    container_name: kafka2
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    environment:
+      - KAFKA_NODE_ID=2
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=PLAINTEXT://kafka2:9093,CONTROLLER://kafka2:9091,PLAINTEXT_HOST://0.0.0.0:29093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9093,PLAINTEXT_HOST://localhost:29093
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka1:9091,2@kafka2:9091,3@kafka3:9091
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - ./volumes/kafka2:/var/lib/kafka/data
+
+  kafka3:
+    image: apache/kafka:3.7.0
+    container_name: kafka3
+    restart: unless-stopped
+    ports:
+      - "9094:9094"
+      - "29094:29094"
+    environment:
+      - KAFKA_NODE_ID=3
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=PLAINTEXT://kafka3:9094,CONTROLLER://kafka3:9091,PLAINTEXT_HOST://0.0.0.0:29094
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9094,PLAINTEXT_HOST://localhost:29094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka1:9091,2@kafka2:9091,3@kafka3:9091
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - ./volumes/kafka3:/var/lib/kafka/data
