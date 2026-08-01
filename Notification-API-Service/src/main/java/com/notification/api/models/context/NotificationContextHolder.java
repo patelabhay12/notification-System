@@ -8,7 +8,7 @@ public final class NotificationContextHolder {
         NOTIFICATION_CONTEXT_THREAD_LOCAL.set(context);
     }
 
-    public static NotificationContext getContext(NotificationContext context){
+    public static NotificationContext getContext(){
         return NOTIFICATION_CONTEXT_THREAD_LOCAL.get();
     }
 
