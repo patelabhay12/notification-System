@@ -29,13 +29,24 @@ class TemplateDaoImpl implements TemplateDao {
     }
 
     @Override
-    public void save(Template template) {
+    public Template save(Template template) {
         templateRepository.save(template);
+        return template;
     }
 
     @Override
     public Page<Template> filterTemplate(Example<Template> example, PageRequest pageRequest) {
-        return templateRepository.findAll(example,pageRequest);
+        return templateRepository.findAll(example, pageRequest);
+    }
+
+    @Override
+    public void deleteTemplate(UUID id) {
+        templateRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<Template> findByTenantIdAndId(UUID uuid, UUID uuid1) {
+        return templateRepository.findByTenantIdAndId(uuid, uuid1);
     }
 
 }

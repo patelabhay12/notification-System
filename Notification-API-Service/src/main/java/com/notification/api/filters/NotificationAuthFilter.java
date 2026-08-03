@@ -30,12 +30,10 @@ public class NotificationAuthFilter extends OncePerRequestFilter {
             NotificationContextHolder.setContext(new NotificationContext(XTenantID));
         }
         filterChain.doFilter(request,response);
-
         if(isValidApi(request.getRequestURI())){
             NotificationContextHolder.clear();
         }
     }
-
 
     static boolean isValidApi(final String path){
         return path.startsWith("/api");
