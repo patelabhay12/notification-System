@@ -15,7 +15,7 @@ public class MongoConfig {
     MongoClient mongoClient() {
 
         ConnectionString connectionString =
-                new ConnectionString("mongodb://root:root@localhost:27017/notification_service?authSource=admin");
+                new ConnectionString("mongodb://admin:admin123@localhost:27017/notification_service?authSource=admin");
 
         MongoClientSettings settings =
                 MongoClientSettings.builder()

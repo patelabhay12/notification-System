@@ -6,6 +6,7 @@ import com.notification.api.models.context.NotificationContext;
 import com.notification.api.models.context.NotificationContextHolder;
 import com.notification.api.models.entities.Template;
 import com.notification.api.models.request.TemplateFilterRequest;
+import com.notification.api.models.request.UpdateTemplateRequest;
 import com.notification.api.models.response.FilterTemplateResponse;
 import com.notification.api.models.response.TemplateResponse;
 import com.notification.api.models.response.TemplateResponseDTO;
@@ -17,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -75,5 +75,59 @@ class TemplateServiceImpl implements TemplateService {
                 templates.hasNext(),
                 templates.getTotalElements()
         );
+    }
+
+    @Override
+    public TemplateResponse updateTemplate(String id, UpdateTemplateRequest updateTemplateRequest) {
+
+
+
+        log.info("Current tenant Id is ... "+ CommonUtils.getCurrentTenantId());
+        log.info("Current id is ... "+ id);
+        Template template = templateDao.findByTenantIdAndId(
+                UUID.fromString(CommonUtils.getCurrentTenantId()),
+                UUID.fromString(id)
+        ).orElseThrow(() -> new ValidationException(
+                 "Template not found",
+                HttpStatus.NOT_FOUND.value()));
+
+        if (CommonUtils.isNotEmpty(updateTemplateRequest.getName())
+                && !updateTemplateRequest.getName().trim().equals(template.getName())) {
+
+            String name = updateTemplateRequest.getName().trim();
+
+            templateDao.findByTenantIdAndName(CommonUtils.getCurrentTenantId(), name)
+                    .ifPresent(existing -> {
+                        throw new ValidationException(
+                                TEMPLATE_ALREADY_EXIT,
+                                HttpStatus.BAD_REQUEST.value());
+                    });
+
+            template.setName(name);
+        }
+
+        if (CommonUtils.isNotEmpty(updateTemplateRequest.getMessageTemplate())) {
+            template.setMessageTemplate(updateTemplateRequest.getMessageTemplate());
+        }
+
+        if (CommonUtils.isNotEmpty(updateTemplateRequest.getTemplatesVariables())) {
+            template.setTemplatesVariables(updateTemplateRequest.getTemplatesVariables());
+        }
+
+        Template savedTemplate = templateDao.save(template);
+
+        return new TemplateResponse(savedTemplate);
+    }
+
+    @Override
+    public void deleteTemplate(UUID id) {
+        templateDao.findByTenantIdAndId(
+                        UUID.fromString(CommonUtils.getCurrentTenantId()), id)
+                .orElseThrow(() -> new ValidationException(
+                        "Template not found",
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        templateDao.deleteTemplate(id);
+
     }
 }

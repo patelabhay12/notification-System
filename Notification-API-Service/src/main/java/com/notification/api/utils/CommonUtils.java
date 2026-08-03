@@ -1,6 +1,5 @@
 package com.notification.api.utils;
 
-import com.notification.api.models.context.NotificationContext;
 import com.notification.api.models.context.NotificationContextHolder;
 import org.springframework.util.ObjectUtils;
 
