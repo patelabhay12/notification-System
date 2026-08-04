@@ -1,6 +1,7 @@
 package com.notification.api.utils;
 
 import com.notification.api.models.context.NotificationContextHolder;
+import org.slf4j.MDC;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Calendar;
@@ -30,7 +31,14 @@ public final class CommonUtils {
         return UUID.randomUUID();
     }
 
+    public static String getCurrentTraceId(){
+        return MDC.get("x-request-id");
+    }
+
     public static String getCurrentTenantId(){
         return NotificationContextHolder.getContext().tenantId();
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package com.notification.api.controller;
+package com.notification.api.controller.template;
 
 import com.notification.api.models.request.TemplateFilterRequest;
 import com.notification.api.models.request.UpdateTemplateRequest;
@@ -6,7 +6,6 @@ import com.notification.api.models.response.ApiResponse;
 import com.notification.api.models.response.TemplateResponse;
 import com.notification.api.services.interfaces.TemplateService;
 import com.notification.api.models.request.CreateTemplateRequest;
-import com.notification.api.utils.CommonUtils;
 import com.notification.api.utils.ResponseUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
