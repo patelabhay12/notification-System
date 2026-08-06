@@ -81,14 +81,13 @@ class TemplateServiceImpl implements TemplateService {
     public TemplateResponse updateTemplate(String id, UpdateTemplateRequest updateTemplateRequest) {
 
 
-
-        log.info("Current tenant Id is ... "+ CommonUtils.getCurrentTenantId());
-        log.info("Current id is ... "+ id);
+        log.info("Current tenant Id is ... " + CommonUtils.getCurrentTenantId());
+        log.info("Current id is ... " + id);
         Template template = templateDao.findByTenantIdAndId(
                 UUID.fromString(CommonUtils.getCurrentTenantId()),
                 UUID.fromString(id)
         ).orElseThrow(() -> new ValidationException(
-                 "Template not found",
+                "Template not found",
                 HttpStatus.NOT_FOUND.value()));
 
         if (CommonUtils.isNotEmpty(updateTemplateRequest.getName())
@@ -127,7 +126,10 @@ class TemplateServiceImpl implements TemplateService {
                         "Template not found",
                         HttpStatus.NOT_FOUND.value()
                 ));
-        templateDao.deleteTemplate(id);
+        templateDao.deleteTemplate(id, () -> new ValidationException(
+                "Template not found",
+                HttpStatus.NOT_FOUND.value()
+        ));
 
     }
 }
