@@ -1,14 +1,17 @@
 package com.notification.api.services.impls;
 
+import com.notification.api.config.ApplicationProperties;
 import com.notification.api.dao.interfaces.TemplateDao;
 import com.notification.api.exception.ValidationException;
 import com.notification.api.models.entities.Template;
 import com.notification.api.models.request.IngestTopicDTO;
 import com.notification.api.models.request.SendNotificationRequest;
+import com.notification.api.pubsub.publisher.GenericPublisher;
 import com.notification.api.services.interfaces.NotificationService;
 import com.notification.api.utils.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -22,17 +25,27 @@ class NotificationServiceImpl implements NotificationService {
 
     private final TemplateDao templateDao;
 
+    private final GenericPublisher genericPublisher;
+    private ApplicationProperties applicationProperties;
+
     @Override
     public void sendNotification(SendNotificationRequest notificationRequest) {
 
-        Optional<Template>  byTenantIdAndId = templateDao.findByTenantIdAndId(UUID.fromString(CommonUtils.getCurrentTenantId()),UUID.fromString(notificationRequest.getTemplateId()));
+        Optional<Template> byTenantIdAndId = templateDao.findByTenantIdAndId(UUID.fromString(CommonUtils.getCurrentTenantId()), UUID.fromString(notificationRequest.getTemplateId()));
 
-        if(byTenantIdAndId.isEmpty()){
-            // TODO send to audit topic;
-            throw  new ValidationException("Template don't exists", HttpStatus.BAD_REQUEST.value());
+        if (byTenantIdAndId.isEmpty()) {
+//            genericPublisher.sendNotificationToAudit();
+            throw new ValidationException("Template don't exists", HttpStatus.BAD_REQUEST.value());
         }
 
 
+        IngestTopicDTO ingestTopicDTO = getIngestTopicDTO(notificationRequest);
+
+        genericPublisher.sendNotificationToIngest(ingestTopicDTO);
+
+    }
+
+    private static @NonNull IngestTopicDTO getIngestTopicDTO(SendNotificationRequest notificationRequest) {
         IngestTopicDTO ingestTopicDTO = new IngestTopicDTO();
 
         ingestTopicDTO.setRequestId(CommonUtils.getCurrentTraceId());
@@ -41,8 +54,6 @@ class NotificationServiceImpl implements NotificationService {
         ingestTopicDTO.setReceivedAt(CommonUtils.getCurrentTimeStamp());
         ingestTopicDTO.setDynamicVariables(notificationRequest.getDynamicVariables());
         ingestTopicDTO.setNotificationType(notificationRequest.getNotificationType());
-
-        // TODO publish to ingest Topic
-
+        return ingestTopicDTO;
     }
 }

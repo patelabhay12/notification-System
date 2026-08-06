@@ -1,10 +1,14 @@
 package com.notification.api.pubsub.publisher;
 
+import com.notification.api.config.ApplicationProperties;
+import com.notification.api.exception.ValidationException;
 import com.notification.api.pubsub.falllback.GenericFallBackPublisher;
 import com.notification.api.pubsub.primary.GenericProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,11 +19,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GenericPublisherImpl implements GenericPublisher {
 
 
-    private List<GenericProvider> genericPublishers;
-    private List<GenericFallBackPublisher> fallBackPublishers;
+    private final List<GenericProvider> genericPublishers;
+    private final List<GenericFallBackPublisher> fallBackPublishers;
+    private ObjectMapper objectMapper;
+    private ApplicationProperties applicationProperties;
 
-    public GenericPublisherImpl(List<GenericProvider> genericPublishers) {
-        this.genericPublishers = genericPublishers;
+
+    @Override
+    public void sendNotificationToIngest(Object input) {
+        sendNotification(applicationProperties.getIngestTopic(), convertDataIntoString(input));
+    }
+
+    @Override
+    public void sendNotificationToAudit(Object input) {
+        sendNotification(applicationProperties.getAuditTopic(), convertDataIntoString(input));
     }
 
 
@@ -60,4 +73,16 @@ public class GenericPublisherImpl implements GenericPublisher {
         });
 
     }
+
+
+    private String convertDataIntoString(Object input) {
+        try {
+            return objectMapper.writeValueAsString(input);
+        } catch (Exception e) {
+            log.info("Error while converting object to string : {}", e.getMessage());
+
+            throw new ValidationException("Error while parsing payload...", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
 }

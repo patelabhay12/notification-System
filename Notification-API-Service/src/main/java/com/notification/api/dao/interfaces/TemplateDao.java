@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public interface TemplateDao {
 
@@ -16,7 +17,7 @@ public interface TemplateDao {
 
     Page<Template> filterTemplate(final Example<Template> example,final PageRequest pageRequest);
 
-    void deleteTemplate(UUID id);
+    void deleteTemplate(UUID id, Supplier<? extends Exception> exceptionSupplier);
 
     Optional<Template> findByTenantIdAndId(UUID uuid, UUID uuid1);
 }
